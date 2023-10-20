@@ -10,6 +10,7 @@ function App() {
   const [token, setToken] = useState(null);
 
   async function requestPermission() {
+    if ('Notification' in window) {
     const permission = await Notification.requestPermission();
 
     if (permission === "granted") {
@@ -39,7 +40,7 @@ function App() {
       alert("You denied the permission");
     }
   }
-
+}
   async function sendTokenToBackend(token, id, phoneNumber) {
     // Define the URL of your backend endpoint
     const backendUrl = 'http://localhost:3000/api/users'; // Update with your actual backend URL

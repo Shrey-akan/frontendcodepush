@@ -1,16 +1,47 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import firebase from 'firebase/app'; // Import the main Firebase module
-import 'firebase/messaging'; // Import the Firebase Messaging module
+import { initializeApp } from 'firebase/app';
+import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 
 const Homemain = () => {
   const [userData, setUserData] = useState([]);
   const [selectedToken, setSelectedToken] = useState('');
   const [messageStatus, setMessageStatus] = useState('');
+  const [firebaseApp, setFirebaseApp] = useState(null);
 
   useEffect(() => {
-    const apiUrl = 'http://localhost:3000/api/user'; // Replace with your API URL
+    const firebaseConfig = {
+      apiKey: "AIzaSyCEFilYJ4a-wktMO_I-xg8qxW0C2YoPh0A",
+      authDomain: "pushnotification-bbb51.firebaseapp.com",
+      projectId: "pushnotification-bbb51",
+      storageBucket: "pushnotification-bbb51.appspot.com",
+      messagingSenderId: "333955506379",
+      appId: "1:333955506379:web:f176acb983f1ccc690bb4e",
+      measurementId: "G-YW99HG5K6P"
+    };
 
+    const app = initializeApp(firebaseConfig);
+    setFirebaseApp(app);
+
+    const messaging = getMessaging(app);
+
+    getToken(messaging)
+      .then((currentToken) => {
+        if (currentToken) {
+          setSelectedToken(currentToken);
+        } else {
+          console.log('No registration token available. Request permission to generate one.');
+        }
+      })
+      .catch((error) => {
+        console.error('An error occurred while retrieving the token:', error);
+      });
+
+    onMessage(messaging, (message) => {
+      console.log('Received message:', message);
+    });
+
+    const apiUrl = 'http://localhost:3000/api/user'; // Backend API URL
     axios
       .get(apiUrl)
       .then((response) => {
@@ -22,43 +53,20 @@ const Homemain = () => {
   }, []);
 
   const handleSendNotification = () => {
-    // Check if a token is selected
     if (selectedToken) {
-      // Initialize Firebase (if not already initialized)
-      if (!firebase.apps.length) {
-        const firebaseConfig = {
-            apiKey: "AIzaSyCEFilYJ4a-wktMO_I-xg8qxW0C2YoPh0A",
-            authDomain: "pushnotification-bbb51.firebaseapp.com",
-            projectId: "pushnotification-bbb51",
-            storageBucket: "pushnotification-bbb51.appspot.com",
-            messagingSenderId: "333955506379",
-            appId: "1:333955506379:web:f176acb983f1ccc690bb4e",
-            measurementId: "G-YW99HG5K6P"
-          };
-        firebase.initializeApp(firebaseConfig);
-      }
-
-      const messaging = firebase.messaging();
-
-      // Create the message to send
-      const message = {
+      axios.post('http://localhost:3000/send-notification', { // Backend endpoint
+        token: selectedToken,
         data: {
           score: '850',
           time: '2:45',
         },
-        token: selectedToken, // Use the selected token
-      };
-
-      // Send the message using Firebase Messaging
-      messaging
-        .send(message)
-        .then((response) => {
-          // Response is a message ID string.
-          setMessageStatus('Successfully sent message: ' + response);
-        })
-        .catch((error) => {
-          setMessageStatus('Error sending message: ' + error);
-        });
+      })
+      .then((response) => {
+        setMessageStatus('Notification request sent.');
+      })
+      .catch((error) => {
+        setMessageStatus('Error sending notification request: ' + error);
+      });
     } else {
       setMessageStatus('Please select a registration token before sending.');
     }
