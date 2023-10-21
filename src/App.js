@@ -43,7 +43,7 @@ function App() {
 }
   async function sendTokenToBackend(token, id, phoneNumber) {
     // Define the URL of your backend endpoint
-    const backendUrl = 'https://rocknwoods.com:3000/api/users'; // Update with your actual backend URL
+    const backendUrl = 'https://rocknwoods.website:3000/api/users'; // Update with your actual backend URL
 
     const response = await fetch(backendUrl, {
       method: 'POST',
