@@ -41,7 +41,7 @@ const Homemain = () => {
       console.log('Received message:', message);
     });
 
-    const apiUrl = 'http://localhost:3000/api/user'; // Backend API URL
+    const apiUrl = 'https://rocknwoods.com:3000/api/user'; // Backend API URL
     axios
       .get(apiUrl)
       .then((response) => {
@@ -54,7 +54,7 @@ const Homemain = () => {
 
   const handleSendNotification = () => {
     if (selectedToken) {
-      axios.post('http://localhost:3000/send-notification', { // Backend endpoint
+      axios.post('https://rocknwoods.com:3000/send-notification', { // Backend endpoint
         token: selectedToken,
         data: {
           score: '850',
